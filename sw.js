@@ -52,10 +52,36 @@ const staticCache = req => {
   });
 };
 
+// Network with cache fallback
+const fallbackCache = req => {
+  // Try Network
+  return (
+    fetch(req)
+      .then(networkRes => {
+        // Check if res is OK, else go to cache
+        if (!networkRes.ok) throw "fetch error";
+
+        // Update cache
+        caches
+          .open(`static-${version}`)
+          .then(cache => cache.put(req, networkRes));
+
+        // Return a clone of newwork response
+        return networkRes.clone();
+      })
+      // Try Cache
+      .catch(err => caches.match(req))
+  );
+};
+
 // SW Fetch
 self.addEventListener("fetch", e => {
   // App shell
   if (e.request.url.match(location.origin)) {
     e.respondWith(staticCache(e.request));
+  }
+  // Giphy API
+  else if (e.request.url.match("api.giphy.com/v1/gifs/trending")) {
+    e.respondWith(fallbackCache(e.request));
   }
 });
