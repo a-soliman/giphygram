@@ -1,6 +1,16 @@
 // Progressive Enhancement
 if (navigator.serviceWorker) {
   navigator.serviceWorker.register("./sw.js").catch(console.error);
+
+  // Giphy cach clean
+  function giphyCachClean(giphys) {
+    // Get Service worker Registration
+    navigator.serviceWorker.getRegistration().then(req => {
+      // Only post message to active SW
+      if (req.active)
+        req.active.postMessage({ action: "cleanGiphyCache", giphys });
+    });
+  }
 }
 
 // Giphy API object
@@ -25,6 +35,15 @@ function update() {
       // Empty Element
       $("#giphys").empty();
 
+      // Populate array of latest Giphys
+      let latestGiphys = [];
+
+      // Loop Giphys
+      $.each(res.data, (i, giphy) => {
+        // Add to latest Giphys
+        latestGiphys.push(giphy.images.downsized_large.url);
+      });
+
       // Loop Giphys
       $.each(res.data, function(i, giphy) {
         // Add Giphy HTML
@@ -36,6 +55,8 @@ function update() {
             "</div>"
         );
       });
+      // Inform the SW (if avilable )of current giphys
+      if (navigator.serviceWorker) giphyCachClean(latestGiphys);
     })
 
     // Failure
