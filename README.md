@@ -2,6 +2,10 @@
 
 # Progressive Web Application | Continuous Integration Enhancement
 
+---
+
+Progressive Web App for displaying the latest trending Gifs from giphy.com
+
 ## Technologies
 
 - Progreesive Web Application.
